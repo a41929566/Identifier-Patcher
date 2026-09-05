@@ -4,42 +4,42 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu‑latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 1. JDK17 for Gradle
       - name: Setup Java
-        uses: actions/setup‑java@v5
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java‑version: 17
+          java-version: 17
 
-      # 2. Android NDK r27c
       - name: Setup Android NDK
-        uses: android‑actions/setup‑ndk@v1
+        uses: android-actions/setup-ndk@v1
         with:
-          ndk‑version: r27c
+          ndk-version: r27c
 
-      # 3. Rust 工具链 + cargo‑ndk
       - name: Install Rust
-        uses: dtolnay/rust‑toolchain@stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64‑linux‑android
+          targets: aarch64-linux-android
 
       - name: Install cargo‑ndk
         run: cargo install cargo‑ndk
 
-      # 4. Gradle构建Magisk模块zip
-      - name: Build Module Zip
+      - name: Gradle build magisk module zipRelease
         run: |
           chmod +x ./gradlew
           ./gradlew :module:zipRelease
 
-      # 5. 上传产物
+      # 调试：打印目录，确认文件生成位置
+      - name: Debug list output dir
+        run: ls -la module/build/distributions/release/
+
       - name: Upload artifact
-        uses: actions/upload‑artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: Identifier‑Patcher‑module
-          path: module/release/*.zip
+          path: module/build/distributions/release/*.zip
+          if-no-files-found: error
